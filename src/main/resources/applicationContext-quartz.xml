@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd ">
+	
+	<!-- 配置组件的自动扫描范围 -->
+ 	<context:component-scan base-package="cn.itcast.quartz"/>
+ 	
+ 	<!-- 第一步：声明一个job -->
+ 	<bean id="promotionJob" 
+ 		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+ 		<property name="jobClass" value="cn.itcast.bos.quartz.BosJob" />
+ 	</bean>
+ 	
+ 	<!-- 第二步：声明一个trigger -->
+ 	<bean id="simpleTrigger" 
+ 		class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+ 		<property name="jobDetail" ref="promotionJob" />
+ 		<property name="startDelay" value="0" />
+ 		<property name="repeatInterval" value="60000" />
+ 	</bean>
+ 	
+ 	<!-- <bean id="cronTrigger" 
+ 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+ 		<property name="jobDetail" ref="promotionJob" />
+ 		<property name="cronExpression" value="* 55 18 * * ?"></property>
+ 	</bean> -->
+ 	
+ 	
+ 	<!-- 第三步：执行触发器scheduler  -->
+ 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+ 		<property name="jobFactory" ref="jobFactory"></property>
+ 		<property name="triggers">
+ 			<list>
+ 				<ref bean="simpleTrigger"/>
+ 			</list>
+ 		</property>
+ 	</bean>
+</beans>

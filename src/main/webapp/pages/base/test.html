@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript" src="../../js/jquery-1.8.3.js"></script>
+		<script>
+			var array = [{"name":"courierNum","value":"s001"},{"name":"standard.id","value":""},{"name":"company","value":""},{"name":"type","value":""}];
+			function abc(){  
+		            var serializeObj={};  
+		            //var array=this.serializeArray();  
+		            $(array).each(function(){  
+		            	var a = serializeObj[this.name];
+		                if(a){  
+		                   /* if($.isArray(serializeObj[this.name])){  
+		                        serializeObj[this.name].push(this.value);  
+		                    }else{  
+		                        serializeObj[this.name]=[serializeObj[this.name],this.value];  
+		                    }  */
+		                }else{  
+		                    serializeObj[this.name]=this.value;   //{courierNum:"s001",} 
+		                }  
+		            });  
+		            return serializeObj;  
+		        }; 
+			
+			$(function(){
+				
+				abc();
+				
+			})
+			
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

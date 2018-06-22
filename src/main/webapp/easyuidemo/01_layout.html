@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<script type="text/javascript" src="../js/jquery-1.8.3.js"></script>
+<script type="text/javascript" src="../js/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../js/easyui/jquery.easyui.min.js"></script>
+<link rel="stylesheet" href="../js/easyui/themes/default/easyui.css" />
+<link rel="stylesheet" href="../js/easyui/themes/icon.css" />
+<script src="../js/ztree/jquery.ztree.all-3.5.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="../js/ztree/zTreeStyle.css"/>
+<script type="text/javascript">
+	$(function(){
+		var setting = {
+			data:{
+				simpleData:{
+					enable:true
+				}
+			},
+			callback:{
+				onClick:function(event,treeId,treeNode,clickFlag){
+					var content = '<div style="width:100%;height:100%;overflow:hidden;">'
+								+ '<iframe src="'
+								+ treeNode.page
+						+ '" scrolling="auto" style="width:100%;height:100%;border:0;" ></iframe></div>';
+					//没有page树形菜单，不打开选项卡
+					if(treeNode.page !=undefined && treeNode.page!=null){
+						//如果选项卡已经打开，选中
+						if($("#mytabs").tabs("exists",treeNode.name)){
+							$("#mytabs").tabs("select",treeNode.name);
+						}else{
+							$("#mytabs").tabs('add',{
+								title:treeNode.name,
+								content:content,
+								closable:true,
+								tools:[{
+									iconCls:'icon-reload',
+									handler:function(){
+										var tab = $('#mytabs').tabs('getTab',treeNode.name);
+									$("iframe[src='"+treeNode.page+"']").get(0).contentWindow.location.reload(true);
+									}
+								}]
+							});
+						}
+					}
+				}
+			}
+		};
+		
+		var zNodes = [
+			{id:1,pId:0,name:"基础数据",open:true,iconOpen:"../images/user_logout.png",iconClose:"../images/reload.png"},
+			{id:11,pId:1,name:"基础档案设置",page:"http://www.itcast.cn"},
+			{id:12,pId:1,name:"收派标准",page:"http://www.baidu.com"},
+			{id:13,pId:1,name:"班车管理"},
+			{id:14,pId:1,name:"快递员设置"},
+			{id:15,pId:1,name:"区域设置"},
+			{id:16,pId:1,name:"管理分区"},
+			{id:17,pId:1,name:"管理定区/调度排版"},
+			{id:18,pId:1,name:"收派时间管理"},
+			{id:2,pId:0,name:"受理",font:{"font-weight":"bold"}},
+			{id:3,pId:0,name:"调度",font:{'color':'red'}},
+			{id:4,pId:0,name:"分拣管理"}
+		];
+		$.fn.zTree.init($("#baseMenu"),setting,zNodes);
+		
+		// 设置全局变量 保存当前正在右键的tabs 标题 
+		var currentRightIndex;
+		// 为选项卡，添加右键菜单
+		$("#mytabs").tabs({
+			//右键选项卡时触发
+			onContextMenu:function(e,title,index){
+				currentRightIndex = index;
+				e.preventDefault();
+				$("#mm").menu('show',{
+					left:e.pageX,
+					top:e.pageY
+				});
+			}
+		});
+		//给右键菜单添加点击事件
+		$("#mm").menu({
+			onClick:function(item){
+				if(item.name ==='Close'){
+					//根据索引删除，也可以根据标题删除，name添加菜单的时候就要设置全局变量保存标题
+					$('#mytabs').tabs('close',currentRightIndex);
+				}else if(item.name === 'CloseOthers'){
+					//获取所有选项卡面板
+					var all_tabs = $('#mytabs').tabs('tabs');
+					//遍历
+					$(all_tabs).each(function(){
+						if($(this).panel('options').title !='消息中心'  && $(this).panel('options').index !=currentRightIndex){
+							$("#mytabs").tabs('close',$(this).panel('options').index);
+						}
+					})
+				}else if(item.name === 'CloseAll'){
+					var all_tabs = $('#mytabs').tabs('tabs');
+					$(all_tabs).each(function(){
+						if($(this).panel('options').title != '消息中心'){
+						$("#mytabs").tabs('close',$(this).panel('options').title);
+						}	
+					})
+				}
+			}
+		})
+		//右下角气泡窗口
+		window.setTimeout(function(){
+			$.messager.show({
+				title:"消息提示",
+				msg:'欢迎登录，超级管理员！ <a href="javascript:void" onclick="top.showAbout();">联系管理员</a>',
+				timeout:3000,
+				showType:'fade' //可用值: null,slide,fade,show. 默认为slide。
+			})
+		},3000)
+	})
+	
+</script>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body class="easyui-layout">
+		<div data-options="region:'north',title:'传智播客管理系统',split:false" style="height:150px;">
+			<a id="btn" href="javascript:void(0)" class="easyui-menubutton" data-options="iconCls:'icon-search',menu:'#linkbutton'">
+				控制面板
+			</a>
+			<div id="linkbutton" style="width: 120px;">
+				<div>修改密码</div>
+				<div>联系管理员</div>
+				<div class="menu-sep"></div>
+				<div>退出系统</div>
+			</div>
+		</div>
+		<div data-options="region:'south',title:'版权',split:true" style="height:100px;"></div>
+		<div data-options="region:'west',title:'菜单导航',split:true" style="width:200px;">
+			<div class="easyui-accordion" data-options="fit:true">
+				<div data-options="title:'基本功能',iconCls:'icon-mini-add'">
+					<ul id="baseMenu" class="ztree"></ul>
+				</div>
+				<div data-options="title:'系统管理',iconCls:'icon-mini-add'">
+					
+				</div>
+				
+			</div>
+		</div>
+		<div data-options="region:'center'" style="padding:5px;background:#eee;">
+			<div id="mytabs" class="easyui-tabs" data-options="fit:true">
+				<div title="消息中心" data-options="iconCls:'icon-reload',closable:true">   
+			        tab3    
+			    </div>   
+			</div>
+		</div>
+		
+		<div id="mm" class="easyui-menu" style="width:120px;">
+			<div data-options="name:'Close'">关闭当前</div>
+			<div data-options="iconCls:'icon-remove',name:'CloseOthers'">关闭其他</div>
+			<div class="menu-sep"></div>
+			<div data-options="iconCls:'icon-cancel',name:'CloseAll'">关闭所有</div>
+		</div>
+		
+	</body>
+
+</html>
